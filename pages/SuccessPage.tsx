@@ -14,7 +14,7 @@ export const SuccessPage: React.FC = () => {
         price: 0,
         date: new Date().toLocaleDateString(),
         customerName: '고객',
-        author: 'Ucraft'
+        author: 'Y2K Interior'
     };
 
     const finalPrice = Math.floor(data.price / 1000) * 1000;

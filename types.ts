@@ -1,4 +1,3 @@
-
 export enum EstimateStatus {
     Completed = "Completed",
     Sent = "Sent",
@@ -14,7 +13,14 @@ export interface Estimate {
     category: "Carpentry" | "Tile" | "General";
     imageUrl: string;
     date: string;
-    author?: string; // 작성자 (상호)
+    author?: string; // 작성자 (상호) - 하위 호환성을 위해 유지
+    
+    // 공급자 정보 상세
+    supplierRegNo?: string;    // 사업자 등록번호
+    supplierName?: string;     // 상호
+    supplierRep?: string;      // 대표자
+    supplierAddress?: string;  // 사업장 주소
+    
     constructionPlace?: string; // 시공 장소
     items?: EstimateItemDetail[];
     bankInfo?: {

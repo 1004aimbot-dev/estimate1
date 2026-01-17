@@ -1,39 +1,25 @@
+
 <!DOCTYPE html>
 <html lang="ko" class="light">
   <head>
     <meta charset="utf-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-    />
-    <title>Ucraft 견적 관리</title>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Y2K Interior 견적 관리</title>
     <!-- Console warning suppression for Tailwind Play CDN -->
     <script>
-      (function () {
+      (function() {
         const originalWarn = console.warn;
-        console.warn = function (...args) {
-          if (
-            typeof args[0] === "string" &&
-            args[0].includes("cdn.tailwindcss.com should not be used in production")
-          ) {
+        console.warn = function(...args) {
+          if (typeof args[0] === 'string' && args[0].includes('cdn.tailwindcss.com should not be used in production')) {
             return;
           }
           originalWarn.apply(console, args);
         };
       })();
     </script>
-
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
-      rel="stylesheet"
-    />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;700&display=swap"
-      rel="stylesheet"
-    />
-
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet" />
     <script>
       tailwind.config = {
         darkMode: "class",
@@ -68,17 +54,16 @@
         },
       };
     </script>
-
     <style>
       body {
-        font-family: "Noto Sans KR", "Inter", sans-serif;
+        font-family: 'Noto Sans KR', 'Inter', sans-serif;
         -webkit-tap-highlight-color: transparent;
       }
       .material-symbols-outlined {
-        font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
       }
       .material-symbols-filled {
-        font-variation-settings: "FILL" 1, "wght" 400, "GRAD" 0, "opsz" 24;
+        font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
       }
       .no-scrollbar::-webkit-scrollbar {
         display: none;
@@ -89,14 +74,8 @@
       }
       /* Confetti Animation */
       @keyframes confetti-fall {
-        0% {
-          transform: translateY(-100%) rotate(0deg);
-          opacity: 1;
-        }
-        100% {
-          transform: translateY(100vh) rotate(720deg);
-          opacity: 0;
-        }
+        0% { transform: translateY(-100%) rotate(0deg); opacity: 1; }
+        100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
       }
       .confetti {
         position: absolute;
@@ -105,27 +84,23 @@
         animation: confetti-fall 3s linear infinite;
       }
     </style>
-
-    <script type="importmap">
-      {
-        "imports": {
-          "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-          "react-router-dom": "https://esm.sh/react-router-dom@^7.12.0",
-          "react/": "https://esm.sh/react@^19.2.3/",
-          "react": "https://esm.sh/react@^19.2.3",
-          "@google/genai": "https://esm.sh/@google/genai",
-          "html2canvas": "https://esm.sh/html2canvas@^1.4.1",
-          "jspdf": "https://esm.sh/jspdf@^4.0.0"
-        }
-      }
-    </script>
-
-    <!-- Vite/React entry -->
-    <link rel="stylesheet" href="/index.css" />
-  </head>
-
+  <script type="importmap">
+{
+  "imports": {
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "react-router-dom": "https://esm.sh/react-router-dom@^7.12.0",
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "react": "https://esm.sh/react@^19.2.3",
+    "@google/genai": "https://esm.sh/@google/genai",
+    "html2canvas": "https://esm.sh/html2canvas@^1.4.1",
+    "jspdf": "https://esm.sh/jspdf@^4.0.0"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
   <body class="bg-background-light dark:bg-background-dark text-[#0d141b] dark:text-slate-100 min-h-screen">
     <div id="root"></div>
-    <script type="module" src="/index.tsx"></script>
-  </body>
+  <script type="module" src="/index.tsx"></script>
+</body>
 </html>
