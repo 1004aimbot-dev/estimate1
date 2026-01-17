@@ -1,4 +1,3 @@
-
 import { Estimate, EstimateStatus, LibraryItem, EstimateTemplate } from "./types";
 
 export const MOCK_ESTIMATES: Estimate[] = [

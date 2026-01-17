@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Layout } from '../components/Layout';
 import { MOCK_LIBRARY, CURRENCY_FORMAT } from '../constants';
@@ -8,9 +8,32 @@ export const Library: React.FC = () => {
     const navigate = useNavigate();
     const [isAdjustmentModalOpen, setIsAdjustmentModalOpen] = useState(false);
     
+    // Category Filtering State
+    const [activeCategory, setActiveCategory] = useState<'전체' | '목공' | '타일' | '자재' | '기타'>('전체');
+    const [searchQuery, setSearchQuery] = useState('');
+
     // Selection Mode State
     const [isSelectionMode, setIsSelectionMode] = useState(false);
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+    const categories: ('전체' | '목공' | '타일' | '자재' | '기타')[] = ['전체', '목공', '타일', '자재', '기타'];
+
+    const filteredItems = useMemo(() => {
+        let items = MOCK_LIBRARY;
+        
+        if (activeCategory !== '전체') {
+            items = items.filter(item => item.category === activeCategory);
+        }
+        
+        if (searchQuery.trim()) {
+            items = items.filter(item => 
+                item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                item.description.toLowerCase().includes(searchQuery.toLowerCase())
+            );
+        }
+        
+        return items;
+    }, [activeCategory, searchQuery]);
 
     const handleAddItemToEstimate = (item: LibraryItem) => {
         if (isSelectionMode) {
@@ -82,7 +105,12 @@ export const Library: React.FC = () => {
                         <div className="text-slate-500 dark:text-slate-400 flex items-center justify-center pl-4">
                             <span className="material-symbols-outlined">search</span>
                         </div>
-                        <input className="flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-[#0d141b] dark:text-slate-100 focus:outline-0 focus:ring-0 border-none bg-transparent placeholder:text-slate-500 dark:placeholder:text-slate-400 px-3 text-base font-normal" placeholder="항목 검색..." />
+                        <input 
+                            className="flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-[#0d141b] dark:text-slate-100 focus:outline-0 focus:ring-0 border-none bg-transparent placeholder:text-slate-500 dark:placeholder:text-slate-400 px-3 text-base font-normal" 
+                            placeholder="항목 검색..." 
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
                         <div className="text-slate-500 dark:text-slate-400 flex items-center justify-center pr-4 cursor-pointer">
                             <span className="material-symbols-outlined text-sm">tune</span>
                         </div>
@@ -102,106 +130,80 @@ export const Library: React.FC = () => {
                 )}
             </div>
 
-            <div className="bg-white dark:bg-background-dark">
-                <div className="flex border-b border-slate-200 dark:border-slate-800 px-4 gap-6 overflow-x-auto no-scrollbar">
-                    {['목공', '타일', '도배', '전기', '기타'].map((tab, idx) => (
-                        <div key={idx} className={`flex flex-col items-center justify-center border-b-[3px] ${idx === 0 ? 'border-primary text-primary' : 'border-transparent text-slate-500 dark:text-slate-400'} pb-[10px] pt-2 shrink-0`}>
-                            <p className="text-sm font-bold tracking-tight">{tab}</p>
-                        </div>
-                    ))}
-                </div>
-            </div>
+            {/* Pill Style Category Bar matching the reference image */}
+            <nav className="flex gap-3 p-4 bg-white dark:bg-background-dark overflow-x-auto no-scrollbar border-b border-slate-100 dark:border-slate-800">
+                {categories.map((cat) => (
+                    <button
+                        key={cat}
+                        onClick={() => setActiveCategory(cat)}
+                        className={`flex h-9 shrink-0 items-center justify-center rounded-full px-5 cursor-pointer transition-all duration-200 ${
+                            activeCategory === cat 
+                            ? 'bg-primary text-white shadow-md shadow-primary/20 font-bold' 
+                            : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-medium hover:bg-slate-200 dark:hover:bg-slate-700'
+                        }`}
+                    >
+                        <p className="text-sm leading-normal">{cat}</p>
+                    </button>
+                ))}
+            </nav>
 
             <div className="flex flex-col pb-32">
-                <div className="px-4 pt-6 pb-2">
-                    <h3 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">추천 공종</h3>
+                <div className="px-4 pt-6 pb-2 flex items-center justify-between">
+                    <h3 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
+                        {activeCategory} 라이브러리 ({filteredItems.length})
+                    </h3>
                 </div>
                 
-                {MOCK_LIBRARY.filter(i => i.isFavorite).map((item) => (
-                    <div 
-                        key={item.id} 
-                        onClick={() => handleAddItemToEstimate(item)}
-                        className={`group flex items-center gap-4 mx-4 my-2 p-3 rounded-xl border shadow-sm transition-all active:scale-[0.98] cursor-pointer
-                            ${isSelectionMode && selectedIds.has(item.id) 
-                                ? 'bg-primary/5 border-primary ring-1 ring-primary dark:bg-primary/10' 
-                                : 'bg-white dark:bg-slate-900/50 border-slate-100 dark:border-slate-800 hover:shadow-md'
-                            }`}
-                    >
-                        {isSelectionMode ? (
-                            <div className={`flex items-center justify-center size-6 rounded-full border transition-colors shrink-0 ${
-                                selectedIds.has(item.id) 
-                                    ? 'bg-primary border-primary' 
-                                    : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600'
-                            }`}>
-                                {selectedIds.has(item.id) && <span className="material-symbols-outlined text-white text-base font-bold">check</span>}
+                {filteredItems.length > 0 ? (
+                    filteredItems.map((item) => (
+                        <div 
+                            key={item.id} 
+                            onClick={() => handleAddItemToEstimate(item)}
+                            className={`group flex items-center gap-4 mx-4 my-2 p-3 rounded-xl border shadow-sm transition-all active:scale-[0.98] cursor-pointer
+                                ${isSelectionMode && selectedIds.has(item.id) 
+                                    ? 'bg-primary/5 border-primary ring-1 ring-primary dark:bg-primary/10' 
+                                    : 'bg-white dark:bg-slate-900/50 border-slate-100 dark:border-slate-800 hover:shadow-md'
+                                }`}
+                        >
+                            {isSelectionMode ? (
+                                <div className={`flex items-center justify-center size-6 rounded-full border transition-colors shrink-0 ${
+                                    selectedIds.has(item.id) 
+                                        ? 'bg-primary border-primary' 
+                                        : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600'
+                                }`}>
+                                    {selectedIds.has(item.id) && <span className="material-symbols-outlined text-white text-base font-bold">check</span>}
+                                </div>
+                            ) : (
+                                <div className={`text-primary flex items-center justify-center rounded-xl bg-primary/10 shrink-0 size-14 ${item.isFavorite ? 'ring-2 ring-primary/20' : ''}`}>
+                                    <span className="material-symbols-outlined text-3xl">
+                                        {item.category === '목공' ? 'construction' : 
+                                         item.category === '타일' ? 'grid_view' : 
+                                         item.category === '자재' ? 'inventory_2' : 'architecture'}
+                                    </span>
+                                </div>
+                            )}
+                            
+                            <div className="flex flex-col justify-center flex-1">
+                                <p className="text-[#0d141b] dark:text-slate-100 text-base font-semibold leading-tight line-clamp-1">{item.name}</p>
+                                <p className="text-primary text-sm font-bold mt-1">{CURRENCY_FORMAT.format(item.price)} / {item.unit}</p>
+                                <p className="text-slate-500 dark:text-slate-400 text-xs mt-0.5 line-clamp-1">{item.description}</p>
                             </div>
-                        ) : (
-                            <div className="text-primary flex items-center justify-center rounded-xl bg-primary/10 shrink-0 size-14">
-                                <span className="material-symbols-outlined text-3xl">
-                                    {item.category === '목공' ? 'construction' : 'architecture'}
-                                </span>
-                            </div>
-                        )}
-                        
-                        <div className="flex flex-col justify-center flex-1">
-                            <p className="text-[#0d141b] dark:text-slate-100 text-base font-semibold leading-tight line-clamp-1">{item.name}</p>
-                            <p className="text-primary text-sm font-bold mt-1">{CURRENCY_FORMAT.format(item.price)} / {item.unit}</p>
-                            <p className="text-slate-500 dark:text-slate-400 text-xs mt-0.5 line-clamp-1">{item.description}</p>
+                            
+                            {!isSelectionMode && (
+                                <div className="shrink-0">
+                                    <button className="flex items-center justify-center rounded-lg h-9 w-9 bg-primary text-white shadow-sm hover:bg-blue-600 transition-colors">
+                                        <span className="material-symbols-outlined">add</span>
+                                    </button>
+                                </div>
+                            )}
                         </div>
-                        
-                        {!isSelectionMode && (
-                            <div className="shrink-0">
-                                <button className="flex items-center justify-center rounded-lg h-9 w-9 bg-primary text-white shadow-sm hover:bg-blue-600 transition-colors">
-                                    <span className="material-symbols-outlined">add</span>
-                                </button>
-                            </div>
-                        )}
+                    ))
+                ) : (
+                    <div className="py-20 text-center text-slate-400 flex flex-col items-center">
+                        <span className="material-symbols-outlined text-5xl mb-3 opacity-30">inventory</span>
+                        <p className="text-sm">해당 조건에 맞는 아이템이 없습니다.</p>
                     </div>
-                ))}
-
-                <div className="px-4 pt-6 pb-2">
-                    <h3 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">자재 라이브러리</h3>
-                </div>
-
-                {MOCK_LIBRARY.filter(i => !i.isFavorite).map((item) => (
-                    <div 
-                        key={item.id} 
-                        onClick={() => handleAddItemToEstimate(item)}
-                        className={`group flex items-center gap-4 mx-4 my-2 p-3 rounded-xl border shadow-sm transition-all active:scale-[0.98] cursor-pointer
-                            ${isSelectionMode && selectedIds.has(item.id) 
-                                ? 'bg-primary/5 border-primary ring-1 ring-primary dark:bg-primary/10' 
-                                : 'bg-white dark:bg-slate-900/50 border-slate-100 dark:border-slate-800 hover:shadow-md'
-                            }`}
-                    >
-                        {isSelectionMode ? (
-                            <div className={`flex items-center justify-center size-6 rounded-full border transition-colors shrink-0 ${
-                                selectedIds.has(item.id) 
-                                    ? 'bg-primary border-primary' 
-                                    : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600'
-                            }`}>
-                                {selectedIds.has(item.id) && <span className="material-symbols-outlined text-white text-base font-bold">check</span>}
-                            </div>
-                        ) : (
-                            <div className="text-primary flex items-center justify-center rounded-xl bg-primary/10 shrink-0 size-14">
-                                <span className="material-symbols-outlined text-3xl">inventory_2</span>
-                            </div>
-                        )}
-                        
-                        <div className="flex flex-col justify-center flex-1">
-                            <p className="text-[#0d141b] dark:text-slate-100 text-base font-semibold leading-tight line-clamp-1">{item.name}</p>
-                            <p className="text-primary text-sm font-bold mt-1">{CURRENCY_FORMAT.format(item.price)} / {item.unit}</p>
-                            <p className="text-slate-500 dark:text-slate-400 text-xs mt-0.5 line-clamp-1">{item.description}</p>
-                        </div>
-                        
-                        {!isSelectionMode && (
-                             <div className="shrink-0">
-                                <button className="flex items-center justify-center rounded-lg h-9 w-9 bg-primary text-white shadow-sm hover:bg-blue-600 transition-colors">
-                                    <span className="material-symbols-outlined">add</span>
-                                </button>
-                            </div>
-                        )}
-                    </div>
-                ))}
+                )}
             </div>
 
             {/* Floating Action Button (Default Mode) */}
@@ -239,10 +241,10 @@ export const Library: React.FC = () => {
                 </div>
             )}
 
-            {/* Adjustment Modal */}
+            {/* Adjustment Modal (Omitted for brevity as it was mostly static UI, but kept logic) */}
             {isAdjustmentModalOpen && (
-                <div className="absolute inset-0 z-50 flex items-end justify-center bg-black/50 backdrop-blur-[2px] animate-fade-in h-screen">
-                    <div className="w-full bg-white dark:bg-[#1c2632] rounded-t-3xl shadow-2xl flex flex-col max-h-[90%] overflow-hidden animate-slide-up">
+                <div className="absolute inset-0 z-[60] flex items-end justify-center bg-black/50 backdrop-blur-[2px] animate-fade-in h-screen">
+                    <div className="w-full bg-white dark:bg-[#1c2632] rounded-t-3xl shadow-2xl flex flex-col max-h-[90%] overflow-hidden animate-slide-up max-w-[480px]">
                         <div className="flex justify-center py-3" onClick={() => setIsAdjustmentModalOpen(false)}>
                             <div className="w-10 h-1.5 bg-slate-300 dark:bg-slate-700 rounded-full"></div>
                         </div>
@@ -277,22 +279,6 @@ export const Library: React.FC = () => {
                                 <div className="flex gap-2">
                                     <button className="flex-1 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-xs font-bold text-primary">상승 (+)</button>
                                     <button className="flex-1 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-xs font-bold text-slate-400">하락 (-)</button>
-                                </div>
-                            </div>
-                            <div className="space-y-3 bg-slate-50 dark:bg-slate-900/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-800">
-                                <label className="block text-xs font-bold text-slate-400 uppercase tracking-tight">조정 미리보기 (예시)</label>
-                                <div className="space-y-4">
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex flex-col">
-                                            <span className="text-xs text-slate-500">석고보드 가벽 설치</span>
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-sm font-medium text-slate-400 line-through">₩55,000</span>
-                                                <span className="material-symbols-outlined text-xs text-slate-400">arrow_forward</span>
-                                                <span className="text-sm font-bold text-primary">₩57,750</span>
-                                            </div>
-                                        </div>
-                                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-primary/10 text-primary">+5%</span>
-                                    </div>
                                 </div>
                             </div>
                         </div>
