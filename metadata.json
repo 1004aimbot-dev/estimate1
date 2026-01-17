@@ -1,0 +1,7 @@
+{
+  "name": "Copy of Copy of EstiMate Pro2",
+  "description": "전문 인테리어 시공 견적 및 관리 도구.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
